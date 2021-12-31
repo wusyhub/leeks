@@ -95,7 +95,7 @@ public class StockWindow {
                                 }
                                 //应用数据
                                 apply();
-                                return super.onChosen(selectedValue, finalChoice);
+                                return PopupStep.FINAL_CHOICE;
                             }
                             //判断是右键是否是删除自选
                             if (selectedValue.getType().equals(PopupsUiUtil.StockShowType.delete.getType())) {
@@ -107,7 +107,7 @@ public class StockWindow {
                                 }
                                 //应用数据
                                 apply();
-                                return super.onChosen(selectedValue, finalChoice);
+                                return PopupStep.FINAL_CHOICE;
                             }
                             try {
                                 PopupsUiUtil.showImageByStockCode(code, selectedValue, new Point(e.getXOnScreen(), e.getYOnScreen()));

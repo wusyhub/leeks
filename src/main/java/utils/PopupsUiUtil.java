@@ -114,6 +114,9 @@ public class PopupsUiUtil {
         }
         JBTabsImpl tabs = new JBTabsImpl(LogUtil.getProject());
         for (StockShowType type : StockShowType.values()) {
+            if (type.equals(StockShowType.top) || type.equals(StockShowType.delete)) {
+                continue;
+            }
             String imageUrlByStock = getImageUrlByStock(stockCode, type);
             JLabel label = new JLabel(imageUrlByStock);
             TabInfo tabInfo = new TabInfo(label);

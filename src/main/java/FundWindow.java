@@ -110,8 +110,9 @@ public class FundWindow implements ToolWindowFactory {
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (table.getSelectedRow() < 0)
+                if (table.getSelectedRow() < 0) {
                     return;
+                }
                 String code = String.valueOf(table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()), fundRefreshHandler.codeColumnIndex));//FIX 移动列导致的BUG
                 if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() > 1) {
                     // 鼠标左键双击
@@ -240,27 +241,6 @@ public class FundWindow implements ToolWindowFactory {
         }
     }
 
-    private static List<String> getDataList(String key) {
-        String value = PropertiesComponent.getInstance().getValue(key);
-        if (StringUtils.isEmpty(value)) {
-            return new ArrayList<>();
-        }
-        List<String> list = new ArrayList<>();
-        String[] codes;
-        //包含分号
-        if (value.contains(";")) {
-            codes = value.split("[;]");
-        } else {
-            codes = value.split("[,，]");
-        }
-        for (String code : codes) {
-            if (!code.isEmpty()) {
-                list.add(code.trim());
-            }
-        }
-        return list;
-    }
-
     /**
      * 数据置顶
      *
@@ -269,7 +249,7 @@ public class FundWindow implements ToolWindowFactory {
      * @return
      */
     public static List<String> getTopDataList(String topCode, String key) {
-        List<String> list = getDataList(key);
+        List<String> list = getConfigList(key);
         //添加制定后数据
         list.add(0, topCode);
         //置顶后的数据去重后转String
@@ -287,11 +267,13 @@ public class FundWindow implements ToolWindowFactory {
      * @return
      */
     public static List<String> deleteData(String deleteCode, String key) {
-        List<String> list = getDataList(key);
+        List<String> list = getConfigList(key);
         //删除后顺序转换为字符串
-        list = list.stream().filter(code -> !code.isEmpty() && !code.equals(deleteCode)).collect(Collectors.toList());
+        list = list.stream().filter(code -> !code.isEmpty() && !code.contains(deleteCode)).collect(Collectors.toList());
         //删除后的数据放到配置上
         PropertiesComponent.getInstance().setValue(key, String.join(";", list));
         return list;
     }
+
+
 }
