@@ -1,7 +1,6 @@
 package utils;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.tabs.TabInfo;
@@ -28,7 +27,7 @@ public class PopupsUiUtil {
     public static void showImageByFundCode(String fundCode, FundShowType type, Point showByPoint) throws MalformedURLException {
         //------试图解决个BUG，项目销毁的问题-------
         Project project = LogUtil.getProject();
-        if (project.isDisposed()){
+        if (project.isDisposed()) {
             return;
         }
         // 图片接口
@@ -110,7 +109,7 @@ public class PopupsUiUtil {
     public static void showImageByStockCode(String stockCode, StockShowType selectType, Point showByPoint) throws MalformedURLException {
         //------试图解决个BUG，项目销毁的问题-------
         Project project = LogUtil.getProject();
-        if (project.isDisposed()){
+        if (project.isDisposed()) {
             return;
         }
         JBTabsImpl tabs = new JBTabsImpl(LogUtil.getProject());
@@ -172,6 +171,10 @@ public class PopupsUiUtil {
          * 置顶
          */
         top("top", "置顶"),
+        /**
+         * 删除自选
+         */
+        delete("delete", "删除自选"),
         /**
          * 分时线图
          */

@@ -33,6 +33,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class FundWindow implements ToolWindowFactory {
     private JPanel mPanel;
@@ -239,35 +240,58 @@ public class FundWindow implements ToolWindowFactory {
         }
     }
 
-    /**
-     * 数据置顶
-     * @param topCode
-     * @param key
-     * @return
-     */
-    public static List<String> getTopDataList(String topCode, String key) {
+    private static List<String> getDataList(String key) {
         String value = PropertiesComponent.getInstance().getValue(key);
         if (StringUtils.isEmpty(value)) {
             return new ArrayList<>();
         }
-        Set<String> set = new LinkedHashSet<>();
-        String[] codes = null;
+        List<String> list = new ArrayList<>();
+        String[] codes;
         //包含分号
         if (value.contains(";")) {
             codes = value.split("[;]");
         } else {
             codes = value.split("[,，]");
         }
-        set.add(topCode);
         for (String code : codes) {
             if (!code.isEmpty()) {
-                set.add(code.trim());
+                list.add(code.trim());
             }
         }
-        //置顶后顺序转换为字符串
-        String newConfig = String.join(",", set);
+        return list;
+    }
+
+    /**
+     * 数据置顶
+     *
+     * @param topCode
+     * @param key
+     * @return
+     */
+    public static List<String> getTopDataList(String topCode, String key) {
+        List<String> list = getDataList(key);
+        //添加制定后数据
+        list.add(0, topCode);
+        //置顶后的数据去重后转String
+        list = list.stream().distinct().collect(Collectors.toList());
         //置顶后的数据放到配置上
-        PropertiesComponent.getInstance().setValue(key,newConfig);
-        return new ArrayList<>(set);
+        PropertiesComponent.getInstance().setValue(key, String.join(";", list));
+        return list;
+    }
+
+    /**
+     * 删除自选
+     *
+     * @param deleteCode
+     * @param key
+     * @return
+     */
+    public static List<String> deleteData(String deleteCode, String key) {
+        List<String> list = getDataList(key);
+        //删除后顺序转换为字符串
+        list = list.stream().filter(code -> !code.isEmpty() && !code.equals(deleteCode)).collect(Collectors.toList());
+        //删除后的数据放到配置上
+        PropertiesComponent.getInstance().setValue(key, String.join(";", list));
+        return list;
     }
 }
