@@ -1,10 +1,10 @@
 package utils;
 
-import com.github.promeg.pinyinhelper.Pinyin;
-
 public class PinYinUtils {
-    public static String toPinYin(String input){
-        return Pinyin.toPinyin(input,"_").toLowerCase();
+    public static String toPinYin(String input) {
+        return input;
+        //暂时不做拼音隐藏
+        //return Pinyin.toPinyin(input,"_").toLowerCase();
     }
 
     public static String[] toPinYin(String[] inputs) {
