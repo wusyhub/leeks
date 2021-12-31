@@ -238,4 +238,36 @@ public class FundWindow implements ToolWindowFactory {
             fundRefreshHandler.handle(loadFunds());
         }
     }
+
+    /**
+     * 数据置顶
+     * @param topCode
+     * @param key
+     * @return
+     */
+    public static List<String> getTopDataList(String topCode, String key) {
+        String value = PropertiesComponent.getInstance().getValue(key);
+        if (StringUtils.isEmpty(value)) {
+            return new ArrayList<>();
+        }
+        Set<String> set = new LinkedHashSet<>();
+        String[] codes = null;
+        //包含分号
+        if (value.contains(";")) {
+            codes = value.split("[;]");
+        } else {
+            codes = value.split("[,，]");
+        }
+        set.add(topCode);
+        for (String code : codes) {
+            if (!code.isEmpty()) {
+                set.add(code.trim());
+            }
+        }
+        //置顶后顺序转换为字符串
+        String newConfig = String.join(",", set);
+        //置顶后的数据放到配置上
+        PropertiesComponent.getInstance().setValue(key,newConfig);
+        return new ArrayList<>(set);
+    }
 }

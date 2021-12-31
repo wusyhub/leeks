@@ -56,16 +56,15 @@ public class StockWindow {
                 //将列名的修改放入环境中 key:stock_table_header_key
                 instance.setValue(WindowUtils.STOCK_TABLE_HEADER_KEY, tableHeadChange
                         .substring(0, tableHeadChange.length() > 0 ? tableHeadChange.length() - 1 : 0));
-
-                //LogUtil.info(instance.getValue(WindowUtils.STOCK_TABLE_HEADER_KEY));
             }
 
         });
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (table.getSelectedRow() < 0)
+                if (table.getSelectedRow() < 0) {
                     return;
+                }
                 String code = String.valueOf(table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()), handler.codeColumnIndex));//FIX 移动列导致的BUG
                 if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() > 1) {
                     // 鼠标左键双击
@@ -86,6 +85,18 @@ public class StockWindow {
 
                         @Override
                         public @Nullable PopupStep onChosen(PopupsUiUtil.StockShowType selectedValue, boolean finalChoice) {
+                            //判断是右键是否是置顶
+                            if (selectedValue.getType().equals(PopupsUiUtil.StockShowType.top.getType())) {
+                                //将数据置顶
+                                if (handler != null) {
+                                    boolean colorful = PropertiesComponent.getInstance().getBoolean("key_colorful");
+                                    handler.refreshColorful(colorful);
+                                    handler.handle(FundWindow.getTopDataList(code,"key_stocks"));
+                                }
+                                //应用数据
+                                apply();
+                                return super.onChosen(selectedValue, finalChoice);
+                            }
                             try {
                                 PopupsUiUtil.showImageByStockCode(code, selectedValue, new Point(e.getXOnScreen(), e.getYOnScreen()));
                             } catch (MalformedURLException ex) {

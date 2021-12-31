@@ -169,6 +169,10 @@ public class PopupsUiUtil {
 
     public enum StockShowType {
         /**
+         * 置顶
+         */
+        top("top", "置顶"),
+        /**
          * 分时线图
          */
         min("min", "分时线图"),
