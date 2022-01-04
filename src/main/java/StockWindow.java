@@ -90,8 +90,9 @@ public class StockWindow {
                                 //将数据置顶
                                 if (handler != null) {
                                     boolean colorful = PropertiesComponent.getInstance().getBoolean("key_colorful");
-                                    handler.refreshColorful(colorful);
+                                    handler.stopHandle();
                                     handler.handle(FundWindow.getTopDataList(code, "key_stocks"));
+                                    handler.refreshColorful(colorful);
                                 }
                                 //应用数据
                                 apply();
@@ -103,6 +104,7 @@ public class StockWindow {
                                 if (handler != null) {
                                     boolean colorful = PropertiesComponent.getInstance().getBoolean("key_colorful");
                                     handler.refreshColorful(colorful);
+                                    handler.stopHandle();
                                     handler.handle(FundWindow.deleteData(code, "key_stocks"));
                                 }
                                 //应用数据

@@ -36,18 +36,15 @@ public class TencentStockHandler extends StockRefreshHandler {
         if (code.isEmpty()) {
             return;
         }
-        worker = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (worker != null && worker.hashCode() == Thread.currentThread().hashCode() && !worker.isInterrupted()) {
-                    stepAction();
-                    try {
-                        Thread.sleep(threadSleepTime * 1000);
-                    } catch (InterruptedException e) {
-                        LogUtil.info("Leeks 已停止更新Stock编码数据.");
-                        refreshTimeLabel.setText("stop");
-                        return;
-                    }
+        worker = new Thread(() -> {
+            while (worker != null && worker.hashCode() == Thread.currentThread().hashCode() && !worker.isInterrupted()) {
+                stepAction();
+                try {
+                    Thread.sleep(threadSleepTime * 1000);
+                } catch (InterruptedException e) {
+                    LogUtil.info("Leeks 已停止更新Stock编码数据.");
+                    refreshTimeLabel.setText("stop");
+                    return;
                 }
             }
         });
@@ -114,8 +111,8 @@ public class TencentStockHandler extends StockRefreshHandler {
             bean.setChange(values[31]);
             bean.setChangePercent(values[32]);
             bean.setTime(values[30]);
-            bean.setMax(values[33]);//33
-            bean.setMin(values[34]);//34
+            bean.setMax(values[33]);
+            bean.setMin(values[34]);
 
             BigDecimal now = new BigDecimal(values[3]);
             String costPriceStr = bean.getCostPrise();
@@ -142,12 +139,9 @@ public class TencentStockHandler extends StockRefreshHandler {
     }
 
     public void updateUI() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                refreshTimeLabel.setText(LocalDateTime.now().format(TianTianFundHandler.timeFormatter));
-                refreshTimeLabel.setToolTipText("最后刷新时间，刷新间隔" + threadSleepTime + "秒");
-            }
+        SwingUtilities.invokeLater(() -> {
+            refreshTimeLabel.setText(LocalDateTime.now().format(TianTianFundHandler.timeFormatter));
+            refreshTimeLabel.setToolTipText("最后刷新时间，刷新间隔" + threadSleepTime + "秒");
         });
     }
 
