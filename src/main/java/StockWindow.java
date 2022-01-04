@@ -8,24 +8,27 @@ import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
 import com.intellij.ui.AnActionButton;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.awt.RelativePoint;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.table.JBTable;
 import handler.SinaStockHandler;
 import handler.StockRefreshHandler;
 import handler.TencentStockHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import utils.HttpClientPool;
 import utils.LogUtil;
 import utils.PopupsUiUtil;
 import utils.WindowUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.*;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class StockWindow {
     private JPanel mPanel;
@@ -138,6 +141,47 @@ public class StockWindow {
             }
         };
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(table)
+                .addExtraAction(new AnActionButton("搜索", AllIcons.Actions.Search) {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent e) {
+                        // 获取 JBPopupFactory
+                        JBPopupFactory instance = JBPopupFactory.getInstance();
+                        JPanel panel = new JPanel();
+                        //设置面板大小
+                        panel.setSize(600, 20);
+                        JTextField searchTextField = new JTextField();
+                        panel.add(searchTextField);
+                        Object[] columns = {"字段一", "字段二", "字段三", "字段四"};//字段
+                        Object[][] data = null;//需要展示的数据，一般是二维数组
+                        DefaultTableModel model = new DefaultTableModel(data, columns);
+                        JBTable table = new JBTable();
+                        table.setModel(model);
+                        panel.add(table);
+                        searchTextField.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyReleased(KeyEvent e) {
+                                handler.clearRow();
+                                String value = searchTextField.getText().trim();
+                                List<String> list = searchData(value);
+                                if (handler != null) {
+                                    handler.refreshColorful(true);
+                                    handler.handle(list);
+                                }
+                            }
+                        });
+
+                        instance.createComponentPopupBuilder(panel, new JBLabel())
+                                .setTitle("搜索")
+                                .setCancelOnClickOutside(true)
+                                .setMovable(true)
+                                //设置可拖动大小
+                                .setResizable(true)
+                                .setNormalWindowLevel(false)
+                                .setMinSize(new Dimension(600, 300))
+                                .createPopup()
+                                .showInFocusCenter();
+                    }
+                })
                 .addExtraAction(new AnActionButton("持续刷新当前表格数据", AllIcons.Actions.Refresh) {
                     @Override
                     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -153,6 +197,31 @@ public class StockWindow {
         mPanel.add(toolPanel, BorderLayout.CENTER);
         // 非主要tab，需要创建，创建时立即应用数据
         apply();
+    }
+
+    /**
+     * 搜索数据信息
+     *
+     * @param value 搜索值
+     */
+    private List<String> searchData(String value) {
+        List<String> list = new ArrayList<>();
+        try {
+            String searchUrl = "http://smartbox.gtimg.cn/s3/?t=all&q=" + value;
+            String result = HttpClientPool.getHttpClient().get(searchUrl);
+            result = result.substring(8, result.length() - 1);
+            String[] strings = result.split("\\^");
+            for (String string : strings) {
+                String[] data = string.split("~");
+                if (Objects.equals(data[0], "sh") || Objects.equals(data[0], "sz")) {
+                    String code = data[0] + data[1];
+                    list.add(code);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     private static StockRefreshHandler factoryHandler() {
@@ -197,7 +266,6 @@ public class StockWindow {
     }
 
     private static List<String> loadStocks() {
-//        return FundWindow.getConfigList("key_stocks", "[,，]");
         return FundWindow.getConfigList("key_stocks");
     }
 

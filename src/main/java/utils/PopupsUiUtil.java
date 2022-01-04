@@ -211,4 +211,27 @@ public class PopupsUiUtil {
             return desc;
         }
     }
+
+    public enum StockFunctionType {
+        /**
+         * 添加自选
+         */
+        top("add", "添加自选");
+
+        private String type;
+        private String desc;
+
+        StockFunctionType(String type, String desc) {
+            this.type = type;
+            this.desc = desc;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+    }
 }
