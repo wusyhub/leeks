@@ -174,22 +174,32 @@ public class PopupsUiUtil {
          * 置顶
          */
         top("top", "置顶"),
+
+        /**
+         * 添加自选
+         */
+        add("add", "添加自选"),
+
         /**
          * 删除自选
          */
         delete("delete", "删除自选"),
+
         /**
          * 分时线图
          */
         min("min", "分时线图"),
+
         /**
          * 日K线图
          */
         daily("daily", "日K线图"),
+
         /**
          * 周K线图
          */
         weekly("weekly", "周K线图"),
+
         /**
          * 月K线图
          */
@@ -199,29 +209,6 @@ public class PopupsUiUtil {
         private String desc;
 
         StockShowType(String type, String desc) {
-            this.type = type;
-            this.desc = desc;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public String getDesc() {
-            return desc;
-        }
-    }
-
-    public enum StockFunctionType {
-        /**
-         * 添加自选
-         */
-        top("add", "添加自选");
-
-        private String type;
-        private String desc;
-
-        StockFunctionType(String type, String desc) {
             this.type = type;
             this.desc = desc;
         }

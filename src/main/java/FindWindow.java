@@ -14,6 +14,7 @@ import handler.StockRefreshHandler;
 import handler.TencentStockHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import utils.HttpClientPool;
 import utils.LogUtil;
 import utils.PopupsUiUtil;
 import utils.WindowUtils;
@@ -21,29 +22,24 @@ import utils.WindowUtils;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.*;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-public class StockWindow extends AbstractWindow {
-
+public class FindWindow extends AbstractWindow {
     private JPanel mPanel;
+    private JTextField searchTextField;
 
     static StockRefreshHandler handler;
 
     static JBTable table;
-
     static JLabel refreshTimeLabel;
 
     public JPanel getmPanel() {
         return mPanel;
-    }
-
-    public static StockRefreshHandler getHandler() {
-        return handler;
     }
 
     static {
@@ -72,7 +68,8 @@ public class StockWindow extends AbstractWindow {
                 if (table.getSelectedRow() < 0) {
                     return;
                 }
-                String code = String.valueOf(table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()), handler.codeColumnIndex));//FIX 移动列导致的BUG
+                //FIX 移动列导致的BUG
+                String code = String.valueOf(table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()), handler.codeColumnIndex));
                 if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() > 1) {
                     // 鼠标左键双击
                     try {
@@ -84,7 +81,10 @@ public class StockWindow extends AbstractWindow {
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     //鼠标右键
                     PopupsUiUtil.StockShowType[] values = Arrays.stream(PopupsUiUtil.StockShowType.values()).filter(type -> {
-                        if (PopupsUiUtil.StockShowType.add.equals(type)) {
+                        if (PopupsUiUtil.StockShowType.top.equals(type)) {
+                            return false;
+                        }
+                        if (PopupsUiUtil.StockShowType.delete.equals(type)) {
                             return false;
                         }
                         return true;
@@ -97,27 +97,14 @@ public class StockWindow extends AbstractWindow {
 
                         @Override
                         public @Nullable PopupStep onChosen(PopupsUiUtil.StockShowType selectedValue, boolean finalChoice) {
-                            //判断是右键是否是置顶
-                            if (selectedValue.getType().equals(PopupsUiUtil.StockShowType.top.getType())) {
-                                //将数据置顶
-                                if (handler != null) {
-                                    boolean colorful = PropertiesComponent.getInstance().getBoolean("key_colorful");
-                                    handler.stopHandle();
-                                    handler.handle(getTopDataList(code, "key_stocks"), true);
-                                    handler.refreshColorful(colorful);
-                                }
-                                //应用数据
-                                apply();
-                                return PopupStep.FINAL_CHOICE;
-                            }
-                            //判断是右键是否是删除自选
-                            if (selectedValue.getType().equals(PopupsUiUtil.StockShowType.delete.getType())) {
+                            //判断是右键是否是添加自选
+                            if (selectedValue.getType().equals(PopupsUiUtil.StockShowType.add.getType())) {
                                 //删除自选
-                                if (handler != null) {
+                                if (StockWindow.handler != null) {
                                     boolean colorful = PropertiesComponent.getInstance().getBoolean("key_colorful");
-                                    handler.refreshColorful(colorful);
-                                    handler.stopHandle();
-                                    handler.handle(deleteData(code, "key_stocks"), true);
+                                    StockWindow.handler.stopHandle();
+                                    StockWindow.handler.handle(getTopDataList(code, "key_stocks"), false);
+                                    StockWindow.handler.refreshColorful(colorful);
                                 }
                                 //应用数据
                                 apply();
@@ -137,11 +124,11 @@ public class StockWindow extends AbstractWindow {
         });
     }
 
-    public StockWindow() {
+
+    public FindWindow() {
 
         //切换接口
         handler = factoryHandler();
-
         AnActionButton refreshAction = new AnActionButton("停止刷新当前表格数据", AllIcons.Actions.Pause) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
@@ -163,9 +150,47 @@ public class StockWindow extends AbstractWindow {
         toolbarDecorator.getActionsPanel().add(refreshTimeLabel, BorderLayout.EAST);
         toolPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
         mPanel.add(toolPanel, BorderLayout.CENTER);
+        searchTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                handler.clearRow();
+                String value = searchTextField.getText().trim();
+                List<String> list = searchData(value);
+                if (handler != null) {
+                    handler.refreshColorful(true);
+                    handler.handle(list, false);
+                }
+            }
+        });
         // 非主要tab，需要创建，创建时立即应用数据
         apply();
     }
+
+    /**
+     * 搜索数据信息
+     *
+     * @param value 搜索值
+     */
+    private List<String> searchData(String value) {
+        List<String> list = new ArrayList<>();
+        try {
+            String searchUrl = "http://smartbox.gtimg.cn/s3/?t=all&q=" + value;
+            String result = HttpClientPool.getHttpClient().get(searchUrl);
+            result = result.substring(8, result.length() - 1);
+            String[] strings = result.split("\\^");
+            for (String string : strings) {
+                String[] data = string.split("~");
+                if (Objects.equals(data[0], "sh") || Objects.equals(data[0], "sz")) {
+                    String code = data[0] + data[1];
+                    list.add(code);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 
     private static StockRefreshHandler factoryHandler() {
         boolean useSinaApi = PropertiesComponent.getInstance().getBoolean("key_stocks_sina");
@@ -196,7 +221,7 @@ public class StockWindow extends AbstractWindow {
             handler.refreshColorful(instance.getBoolean("key_colorful"));
             handler.clearRow();
             handler.setupTable(loadStocks());
-            handler.handle(loadStocks(), true);
+            handler.handle(loadStocks(), false);
         }
     }
 
@@ -204,7 +229,7 @@ public class StockWindow extends AbstractWindow {
         if (handler != null) {
             boolean colorful = PropertiesComponent.getInstance().getBoolean("key_colorful");
             handler.refreshColorful(colorful);
-            handler.handle(loadStocks(), true);
+            handler.handle(loadStocks(), false);
         }
     }
 

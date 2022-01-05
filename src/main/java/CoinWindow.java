@@ -17,7 +17,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
-public class CoinWindow {
+public class CoinWindow extends AbstractWindow {
+
     private JPanel mPanel;
 
     static CoinRefreshHandler handler;
@@ -55,7 +56,7 @@ public class CoinWindow {
     public CoinWindow() {
 
         //切换接口
-        handler = new YahooCoinHandler(table,refreshTimeLabel);
+        handler = new YahooCoinHandler(table, refreshTimeLabel);
 
         AnActionButton refreshAction = new AnActionButton("停止刷新当前表格数据", AllIcons.Actions.Pause) {
             @Override
@@ -76,12 +77,11 @@ public class CoinWindow {
                 .setToolbarPosition(ActionToolbarPosition.TOP);
         JPanel toolPanel = toolbarDecorator.createPanel();
         toolbarDecorator.getActionsPanel().add(refreshTimeLabel, BorderLayout.EAST);
-        toolPanel.setBorder(new EmptyBorder(0,0,0,0));
+        toolPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
         mPanel.add(toolPanel, BorderLayout.CENTER);
         // 非主要tab，需要创建，创建时立即应用数据
         apply();
     }
-
 
 
     public static void apply() {
@@ -95,6 +95,7 @@ public class CoinWindow {
             handler.handle(loadCoins());
         }
     }
+
     public static void refresh() {
         if (handler != null) {
             boolean colorful = PropertiesComponent.getInstance().getBoolean("key_colorful");
@@ -103,8 +104,8 @@ public class CoinWindow {
         }
     }
 
-    private static List<String> loadCoins(){
-        return FundWindow.getConfigList("key_coins", "[,，]");
+    private static List<String> loadCoins() {
+        return getConfigList("key_coins", "[,，]");
     }
 
 }

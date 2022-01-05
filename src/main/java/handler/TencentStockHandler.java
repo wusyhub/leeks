@@ -26,14 +26,15 @@ public class TencentStockHandler extends StockRefreshHandler {
     }
 
     @Override
-    public void handle(List<String> code) {
-
-        if (worker != null) {
-            worker.interrupt();
-        }
+    public void handle(List<String> code, boolean refresh) {
         LogUtil.info("Leeks 更新Stock编码数据.");
-//        clearRow();
         if (code.isEmpty()) {
+            return;
+        }
+        //编码处理
+        this.processing(code);
+        if (!refresh) {
+            this.stepAction();
             return;
         }
         worker = new Thread(() -> {
@@ -48,7 +49,16 @@ public class TencentStockHandler extends StockRefreshHandler {
                 }
             }
         });
+        worker.start();
 
+    }
+
+    /**
+     * 编码处理
+     *
+     * @param code
+     */
+    private void processing(List<String> code) {
         //股票编码，英文分号分隔（成本价和成本接在编码后用逗号分隔）
         List<String> codeList = new ArrayList<>();
         codeMap = new HashMap<>();
@@ -63,10 +73,10 @@ public class TencentStockHandler extends StockRefreshHandler {
             codeList.add(strArray[0]);
             codeMap.put(strArray[0], strArray);
         }
-
         urlPara = String.join(",", codeList);
-        worker.start();
-
+        if (worker != null) {
+            worker.interrupt();
+        }
     }
 
     @Override

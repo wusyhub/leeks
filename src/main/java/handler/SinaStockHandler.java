@@ -33,11 +33,15 @@ public class SinaStockHandler extends StockRefreshHandler {
     }
 
     @Override
-    public void handle(List<String> code) {
+    public void handle(List<String> code, boolean refresh) {
         if (code.isEmpty()) {
             return;
         }
-
+        //单次执行
+        if (!refresh) {
+            pollStock(code);
+            return;
+        }
         useScheduleThreadExecutor(code);
     }
 

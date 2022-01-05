@@ -25,6 +25,7 @@ public abstract class StockRefreshHandler extends DefaultTableModel {
     public int codeColumnIndex;
 
     private JTable table;
+
     private boolean colorful = true;
 
     static {
@@ -92,8 +93,9 @@ public abstract class StockRefreshHandler extends DefaultTableModel {
      * 从网络更新数据
      *
      * @param code
+     * @param refresh 是否自动刷新
      */
-    public abstract void handle(List<String> code);
+    public abstract void handle(List<String> code, boolean refresh);
 
     /**
      * 设置表格条纹（斑马线）<br>
