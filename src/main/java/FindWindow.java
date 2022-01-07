@@ -38,6 +38,8 @@ public class FindWindow extends AbstractWindow {
     static JBTable table;
     static JLabel refreshTimeLabel;
 
+    static List<String> codes;
+
     public JPanel getmPanel() {
         return mPanel;
     }
@@ -155,10 +157,10 @@ public class FindWindow extends AbstractWindow {
             public void keyReleased(KeyEvent e) {
                 handler.clearRow();
                 String value = searchTextField.getText().trim();
-                List<String> list = searchData(value);
+                codes = searchData(value);
                 if (handler != null) {
                     handler.refreshColorful(true);
-                    handler.handle(list, false);
+                    handler.handle(codes, false);
                 }
             }
         });
@@ -220,8 +222,10 @@ public class FindWindow extends AbstractWindow {
             handler.setThreadSleepTime(instance.getInt("key_stocks_thread_time", handler.getThreadSleepTime()));
             handler.refreshColorful(instance.getBoolean("key_colorful"));
             handler.clearRow();
-            handler.setupTable(loadStocks());
-            handler.handle(loadStocks(), false);
+            if (codes != null) {
+                handler.setupTable(codes);
+                handler.handle(codes, false);
+            }
         }
     }
 
@@ -229,12 +233,8 @@ public class FindWindow extends AbstractWindow {
         if (handler != null) {
             boolean colorful = PropertiesComponent.getInstance().getBoolean("key_colorful");
             handler.refreshColorful(colorful);
-            handler.handle(loadStocks(), false);
+            handler.handle(codes, false);
         }
-    }
-
-    private static List<String> loadStocks() {
-        return getConfigList("key_stocks");
     }
 
 }
