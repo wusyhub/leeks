@@ -32,20 +32,19 @@ public class WindowFactory implements ToolWindowFactory {
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         //先加载代理
         loadProxySetting();
-
+        ContentManager contentManager = toolWindow.getContentManager();
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        //基金
-        Content content_fund = contentFactory.createContent(fundWindow.getmPanel(), "Fund", false);
         //股票
         Content content_stock = contentFactory.createContent(stockWindow.getmPanel(), "Stock", false);
+        contentManager.addContent(content_stock);
         //查找窗口
         Content content_find = contentFactory.createContent(findWindow.getmPanel(), "Find", false);
+        contentManager.addContent(content_find);
+        //基金
+        Content content_fund = contentFactory.createContent(fundWindow.getmPanel(), "Fund", false);
+        contentManager.addContent(content_fund);
         //虚拟货币
         Content content_coin = contentFactory.createContent(coinWindow.getmPanel(), "Coin", false);
-        ContentManager contentManager = toolWindow.getContentManager();
-        contentManager.addContent(content_fund);
-        contentManager.addContent(content_stock);
-        contentManager.addContent(content_find);
         contentManager.addContent(content_coin);
         if (StringUtils.isEmpty(PropertiesComponent.getInstance().getValue("key_funds"))) {
             // 没有配置基金数据，选择展示股票
