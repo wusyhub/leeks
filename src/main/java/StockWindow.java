@@ -14,6 +14,7 @@ import handler.StockRefreshHandler;
 import handler.TencentStockHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import utils.DragDropRowTableUI;
 import utils.LogUtil;
 import utils.PopupsUiUtil;
 import utils.WindowUtils;
@@ -51,6 +52,7 @@ public class StockWindow extends AbstractWindow {
         refreshTimeLabel.setToolTipText("最后刷新时间");
         refreshTimeLabel.setBorder(new EmptyBorder(0, 0, 0, 5));
         table = new JBTable();
+        table.setUI(new DragDropRowTableUI());
         //记录列名的变化
         table.getTableHeader().addMouseMotionListener(new MouseMotionAdapter() {
             @Override
